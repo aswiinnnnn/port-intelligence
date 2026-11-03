@@ -1,0 +1,422 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import 'leaflet/dist/leaflet.css';
+
+:root {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Inter', sans-serif;
+
+  /* Colors matching the reference image */
+  --bg-primary: #8cb1b2; /* A misty cyan/gray base behind the image */
+  --bg-secondary: rgba(255, 255, 255, 0.1);
+  --border-color: rgba(255, 255, 255, 0.2);
+  --border-light: rgba(255, 255, 255, 0.4);
+  
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.8);
+  --text-muted: rgba(255, 255, 255, 0.5);
+  --text-dark: #2a3f45; /* For text on light backgrounds */
+  
+  /* Accent Colors */
+  --accent-cyan: #ffffff; /* White accent */
+  --accent-cyan-dark: rgba(255, 255, 255, 0.7);
+  --accent-blue: #3b82f6;
+  --accent-green: #4ade80;
+  
+  /* Specific UI Colors */
+  --glass-bg: rgba(255, 255, 255, 0.15);
+  --glass-dark-bg: rgba(0, 0, 0, 0.15);
+  --card-gradient-1: linear-gradient(135deg, rgba(23, 73, 77, 0.9) 0%, rgba(53, 114, 117, 0.8) 100%);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #8cb1b2;
+  min-height: 100vh;
+  color: var(--text-primary);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Glassmorphism utilities */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border-color);
+  box-shadow: none;
+  border-radius: 12px;
+  isolation: isolate;
+}
+
+.glass-pill {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  isolation: isolate;
+}
+
+.glass-dark-panel {
+  background: var(--glass-dark-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  isolation: isolate;
+}
+
+/* Typography Helpers */
+.text-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+}
+
+.pill-label {
+  display: inline-block;
+  padding: 4px 12px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  font-size: 11px;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.status-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  background: rgba(91, 226, 200, 0.2);
+  border: 1px solid var(--accent-cyan);
+  border-radius: 12px;
+  font-size: 10px;
+  color: var(--accent-cyan);
+}
+
+/* Hide all scrollbars */
+::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+* {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Map Overrides */
+.custom-map .leaflet-container,
+.custom-map .leaflet-pane,
+.custom-map .leaflet-tile-pane {
+  font-family: var(--font-sans) !important;
+}
+
+.custom-map .leaflet-control-zoom {
+  display: none; /* Hide zoom controls to match the clean aesthetic */
+}
+
+/* SVG Chart Path Animations */
+@keyframes drawPath {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-path {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: drawPath 2.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes drawArea {
+  from {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+.animate-area {
+  transform-origin: bottom;
+  animation: drawArea 1.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes drawPoint {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-point {
+  transform-origin: center;
+  animation: drawPoint 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Light placeholder override */
+.light-placeholder::placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
+  opacity: 1;
+}
+
+/* Dark placeholder override for light layouts */
+.dark-placeholder::placeholder {
+  color: rgba(15, 23, 42, 0.45) !important;
+  opacity: 1;
+}
+
+
+
+/* Photoshop-like feathered edge blend using CSS Mask compositing */
+.feathered-map {
+  mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%),
+              linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+  mask-composite: intersect;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%),
+                      linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+  -webkit-mask-composite: source-in;
+}
+
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+  }
+  to { 
+    opacity: 1; 
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+/* Custom Tooltip Hover Trigger */
+.custom-tooltip-trigger:hover .custom-tooltip-card {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0) !important;
+}
+
+/* 
+  When Browser Zoom is 100% at 1920x1080, available viewport height is ~880px-940px.
+  When Browser Zoom is 125%, effective viewport height is larger (~1080px equivalent).
+  Targeting max-height: 980px ensures 100% zoom gets scaled down cleanly to match 125% zoom presentation.
+*/
+@media screen and (max-height: 980px) {
+  .dashboard-main-container {
+    padding: 6px 14px 0 14px !important;
+    gap: 6px !important;
+  }
+  .dashboard-kpi-header {
+    margin-top: 0px !important;
+    gap: 6px !important;
+  }
+  .dashboard-kpi-val {
+    font-size: 20px !important;
+  }
+  .dashboard-chart-box {
+    height: 135px !important;
+  }
+  .dashboard-chart-svg {
+    height: 95px !important;
+  }
+  .dashboard-chart-y {
+    height: 95px !important;
+  }
+  .dashboard-bottom-bar {
+    padding: 8px 14px !important;
+    font-size: 11px !important;
+  }
+  .dashboard-vessel-card {
+    min-height: 145px !important;
+    padding: 10px 12px !important;
+  }
+
+/* SaaS Demo Preview Animations */
+/* Outer wrapper: expands from 0 width, pushing flex siblings to the right */
+@keyframes mscExpandWidth {
+  0%   { max-width: 0; opacity: 1; overflow: hidden; }
+  99%  { max-width: 392px; opacity: 1; overflow: hidden; }
+  100% { max-width: 392px; opacity: 1; overflow: visible; }
+}
+
+/* Inner card: slides from left into its final position */
+@keyframes mscSlideCard {
+  0%   { transform: translateX(-100%); opacity: 0; }
+  20%  { opacity: 1; }
+  100% { transform: translateX(0);    opacity: 1; }
+}
+
+/* Wrapper and inner layer are flex boxes so the arriving card stretches to the row height like its siblings */
+.msc-push-wrapper {
+  display: flex;
+  flex-shrink: 0;
+  overflow: visible;
+  padding: 12px;
+  margin: -12px;
+  animation: mscExpandWidth 0.62s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.msc-push-inner {
+  display: flex;
+  animation: mscSlideCard 0.62s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  overflow: visible;
+}
+
+/* 3-Blink Glow animation for new ship card arrival (Minimal White Glow) */
+@keyframes blinkGlow3Times {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+  15% {
+    box-shadow: 0 0 14px 2px rgba(255, 255, 255, 0.75), 0 0 5px 1px rgba(255, 255, 255, 0.5);
+    border-color: #ffffff;
+  }
+  30% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+  45% {
+    box-shadow: 0 0 14px 2px rgba(255, 255, 255, 0.75), 0 0 5px 1px rgba(255, 255, 255, 0.5);
+    border-color: #ffffff;
+  }
+  60% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+  75% {
+    box-shadow: 0 0 14px 2px rgba(255, 255, 255, 0.75), 0 0 5px 1px rgba(255, 255, 255, 0.5);
+    border-color: #ffffff;
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+}
+
+.msc-card-glow-blink {
+  animation: blinkGlow3Times 2.1s ease-in-out 0.4s 1 forwards !important;
+  overflow: visible !important;
+}
+
+
+@keyframes pulseAlert {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.8);
+  }
+  50% {
+    transform: scale(1.18);
+    box-shadow: 0 0 0 12px rgba(239, 68, 68, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+@keyframes pulseGlowBorder {
+  0%, 100% {
+    border-color: rgba(59, 130, 246, 0.6);
+    box-shadow: 0 10px 35px rgba(37, 99, 235, 0.25), 0 0 15px rgba(59, 130, 246, 0.4);
+  }
+  50% {
+    border-color: rgba(99, 102, 241, 0.9);
+    box-shadow: 0 12px 40px rgba(99, 102, 241, 0.45), 0 0 25px rgba(99, 102, 241, 0.6);
+  }
+}
+
+@keyframes slideInRightToLeft {
+  0% {
+    transform: translateX(calc(100% + 40px));
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-left {
+  animation: slideInFromLeft 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-right-to-left {
+  animation: slideInRightToLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-pulse-alert {
+  animation: pulseAlert 1.5s infinite ease-in-out;
+}
+
+.animate-pulse-glow-border {
+  animation: pulseGlowBorder 2.5s infinite ease-in-out;
+}
+  .dashboard-vessel-img {
+    height: 85px !important;
+    bottom: 12px !important;
+  }
+  .dashboard-vessel-specs {
+    margin-top: 10px !important;
+    font-size: 9.5px !important;
+  }
+}
+
+/* ---- Arabic / right-to-left ---- */
+html[lang='ar'] body,
+html[lang='ar'] button,
+html[lang='ar'] input,
+html[lang='ar'] textarea,
+html[lang='ar'] select {
+  font-family: 'Segoe UI', Tahoma, 'Noto Sans Arabic', 'Inter', system-ui, sans-serif !important;
+}
+
+/* Letter-spacing breaks Arabic letter joining */
+html[lang='ar'] * {
+  letter-spacing: normal !important;
+}
+
+/* Maps, coordinates and codes stay left-to-right */
+html[dir='rtl'] .leaflet-container {
+  direction: ltr;
+}
+
+/* Directional icons point the other way in right-to-left layouts */
+html[dir='rtl'] svg.lucide-arrow-right,
+html[dir='rtl'] svg.lucide-arrow-left,
+html[dir='rtl'] svg.lucide-chevron-right,
+html[dir='rtl'] svg.lucide-chevron-left,
+html[dir='rtl'] svg.lucide-send {
+  transform: scaleX(-1);
+}
+
+/* Emails, passwords and numbers are typed left-to-right even in Arabic */
+html[dir='rtl'] input[type='email'],
+html[dir='rtl'] input[type='password'],
+html[dir='rtl'] input[type='number'] {
+  direction: ltr;
+  text-align: right;
+}
+
+/* Dark map theme built from standard OpenStreetMap tiles */
+.map-tiles-dark {
+  filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9);
+}
